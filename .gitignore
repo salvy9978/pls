@@ -9,3 +9,4 @@ build/
 *.so
 .ruff_cache/
 .pytest_cache/
+.idea/
