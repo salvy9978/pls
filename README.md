@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/pypi/v/pls-code?color=blue" alt="PyPI">
-  <img src="https://img.shields.io/pypi/pyversions/pls-code" alt="Python">
+  <img src="https://img.shields.io/pypi/v/pls-sh?color=blue" alt="PyPI">
+  <img src="https://img.shields.io/pypi/pyversions/pls-sh" alt="Python">
   <img src="https://img.shields.io/github/license/salvy9978/pls" alt="License">
 </p>
 
@@ -38,7 +38,7 @@ $ pls "compress all PNGs in this folder"
 ## Install
 
 ```bash
-pip install pls-code
+pip install pls-sh
 ```
 
 That's it. The command is `pls`.

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pls-code"
+name = "pls-sh"
 version = "0.1.0"
 description = "Terminal in natural language. Just say what you want."
 readme = "README.md"
