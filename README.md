@@ -16,9 +16,8 @@
   <img src="https://img.shields.io/github/license/salvy9978/pls" alt="License">
 </p>
 
-<!-- TODO: replace with actual GIF after recording with `vhs demo.tape` -->
 <p align="center">
-  <img src="demo.gif" alt="pls demo" width="600">
+  <img src="https://raw.githubusercontent.com/salvy9978/pls/main/demo.gif" alt="pls demo" width="600">
 </p>
 
 ```
