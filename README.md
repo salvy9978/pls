@@ -57,10 +57,13 @@ Works offline by default with [Ollama](https://ollama.ai). No API key, no intern
 ### Flags
 
 ```bash
-pls "do something" --explain    # also explains what the command does
-pls "do something" --yes        # skip confirmation, just run it
-pls "do something" --provider openai  # use a different LLM
-pls "do something" --model gpt-4o    # pick a specific model
+pls "do something" --explain        # also explains what the command does
+pls "do something" --yes            # skip confirmation, just run it
+pls "do something" --dry-run        # show command but don't run it
+pls "do something" --provider openai
+pls "do something" --model gpt-4o
+pls --last                          # show the last generated command
+echo "do something" | pls           # pipe from stdin
 ```
 
 ### Safety
