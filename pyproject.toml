@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pls-sh"
-version = "0.1.1"
+version = "0.1.2"
 description = "Terminal in natural language. Just say what you want."
 readme = "README.md"
 license = "MIT"
