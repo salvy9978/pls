@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import re
 import sys
 
 import typer
@@ -27,6 +29,8 @@ console = Console()
 err_console = Console(stderr=True)
 
 _SUBCOMMANDS = {"config"}
+_CACHE_DIR = os.path.join(os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")), "pls")
+_LAST_FILE = os.path.join(_CACHE_DIR, "last")
 
 
 def _clean_command(raw: str) -> str:
@@ -37,7 +41,28 @@ def _clean_command(raw: str) -> str:
         cleaned = "\n".join(lines).strip()
     if cleaned.startswith("`") and cleaned.endswith("`"):
         cleaned = cleaned[1:-1]
+    cleaned = re.sub(r"\s*#\s*WARNING:.*$", "", cleaned, flags=re.MULTILINE).strip()
     return cleaned
+
+
+def _save_last(command: str) -> None:
+    os.makedirs(_CACHE_DIR, exist_ok=True)
+    with open(_LAST_FILE, "w") as f:
+        f.write(command)
+
+
+def _load_last() -> str | None:
+    try:
+        with open(_LAST_FILE) as f:
+            return f.read().strip() or None
+    except FileNotFoundError:
+        return None
+
+
+def _read_stdin() -> str | None:
+    if sys.stdin.isatty():
+        return None
+    return sys.stdin.read().strip() or None
 
 
 def _display_command(command: str, risk: RiskLevel) -> None:
@@ -72,8 +97,9 @@ def _show_help() -> None:
     console.print("Examples:")
     console.print("  pls [dim]\"find all files bigger than 100MB\"[/dim]")
     console.print("  pls [dim]\"compress all PNGs in this folder\"[/dim]")
-    console.print("  pls [dim]\"show disk usage sorted by size\"[/dim]\n")
-    console.print("Options: --yes, --explain, --provider, --model, --version")
+    console.print("  pls [dim]\"show disk usage sorted by size\"[/dim]")
+    console.print("  echo [dim]\"kill port 3000\" | pls[/dim]\n")
+    console.print("Options: --yes, --explain, --dry-run, --last, --provider, --model, --version")
     console.print("Config:  pls config show")
 
 
@@ -81,6 +107,7 @@ def _run_request(
     request: str,
     yes: bool = False,
     explain: bool = False,
+    dry_run: bool = False,
     provider_override: str | None = None,
     model_override: str | None = None,
 ) -> None:
@@ -118,12 +145,17 @@ def _run_request(
         command = _clean_command(parts[0])
         explanation = parts[1].strip()
 
+    _save_last(command)
+
     safety = analyze(command)
     _display_command(command, safety.level)
     _display_warnings(safety.warnings, safety.level)
 
     if explanation:
         console.print(f"\n[dim]{explanation}[/dim]")
+
+    if dry_run:
+        return
 
     if not yes:
         if not _confirm_execution(safety.level):
@@ -198,6 +230,14 @@ def main() -> None:
         console.print(f"pls [bold]{__version__}[/bold]")
         return
 
+    if args[0] == "--last":
+        last = _load_last()
+        if last:
+            console.print(last)
+        else:
+            err_console.print("[dim]No previous command.[/dim]")
+        return
+
     if args[0] in _SUBCOMMANDS:
         app()
         return
@@ -205,6 +245,7 @@ def main() -> None:
     request_parts: list[str] = []
     yes = False
     explain = False
+    dry_run = False
     provider_val: str | None = None
     model_val: str | None = None
 
@@ -215,6 +256,8 @@ def main() -> None:
             yes = True
         elif arg in ("--explain", "-e"):
             explain = True
+        elif arg in ("--dry-run", "-n"):
+            dry_run = True
         elif arg in ("--provider", "-p") and i + 1 < len(args):
             i += 1
             provider_val = args[i]
@@ -226,8 +269,20 @@ def main() -> None:
         i += 1
 
     request = " ".join(request_parts)
-    if not request:
-        _show_help()
-        return
 
-    _run_request(request, yes=yes, explain=explain, provider_override=provider_val, model_override=model_val)
+    if not request:
+        piped = _read_stdin()
+        if piped:
+            request = piped
+        else:
+            _show_help()
+            return
+
+    _run_request(
+        request,
+        yes=yes,
+        explain=explain,
+        dry_run=dry_run,
+        provider_override=provider_val,
+        model_override=model_val,
+    )
