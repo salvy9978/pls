@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/pypi/v/pls-sh?color=blue" alt="PyPI">
-  <img src="https://img.shields.io/pypi/pyversions/pls-sh" alt="Python">
+  <img src="https://img.shields.io/pypi/v/pls-sh?color=blue&v=2" alt="PyPI">
+  <img src="https://img.shields.io/pypi/pyversions/pls-sh?v=2" alt="Python">
   <img src="https://img.shields.io/github/license/salvy9978/pls" alt="License">
 </p>
 
