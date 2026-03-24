@@ -83,12 +83,35 @@ def _display_warnings(warnings: list[str], risk: RiskLevel) -> None:
     console.print(f"\n {icon} [bold]{label}:[/bold] {', '.join(warnings)}")
 
 
-def _confirm_execution(risk: RiskLevel) -> bool:
+def _confirm_execution(risk: RiskLevel) -> str:
     if risk == RiskLevel.DANGEROUS:
-        console.print("\n [red bold]Run this dangerous command?[/red bold] [dim](y/N)[/dim] ", end="")
-        return input().strip().lower() == "y"
-    console.print("\n Run it? [dim](Y/n)[/dim] ", end="")
-    return input().strip().lower() != "n"
+        console.print("\n [red bold]Run this dangerous command?[/red bold] [dim](y/N/e)[/dim] ", end="")
+        choice = input().strip().lower()
+        if choice == "y":
+            return "run"
+        if choice == "e":
+            return "edit"
+        return "cancel"
+    console.print("\n Run it? [dim](Y/n/e)[/dim] ", end="")
+    choice = input().strip().lower()
+    if choice == "n":
+        return "cancel"
+    if choice == "e":
+        return "edit"
+    return "run"
+
+
+def _edit_command(command: str) -> str | None:
+    import readline
+    readline.set_startup_hook(lambda: readline.insert_text(command))
+    try:
+        console.print("\n [dim]Edit command (press Enter to run):[/dim]")
+        edited = input(" $ ").strip()
+        return edited if edited else None
+    except (EOFError, KeyboardInterrupt):
+        return None
+    finally:
+        readline.set_startup_hook()
 
 
 def _show_help() -> None:
@@ -159,9 +182,17 @@ def _run_request(
         return
 
     if not yes:
-        if not _confirm_execution(safety.level):
+        choice = _confirm_execution(safety.level)
+        if choice == "cancel":
             console.print("[dim]Cancelled.[/dim]")
             return
+        if choice == "edit":
+            edited = _edit_command(command)
+            if not edited:
+                console.print("[dim]Cancelled.[/dim]")
+                return
+            command = edited
+            _save_last(command)
     elif safety.level == RiskLevel.DANGEROUS:
         err_console.print(
             "[red bold]Refusing to auto-run dangerous command. Remove --yes or review manually.[/red bold]"
