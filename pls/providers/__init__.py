@@ -43,5 +43,12 @@ def get_provider(name: str, config: dict[str, Any]) -> Provider:
         model = get_model(config, "anthropic") or "claude-sonnet-4-20250514"
         return AnthropicProvider(api_key=api_key, model=model)
 
+    elif name == "lmstudio":
+        from pls.providers.lmstudio import LMStudioProvider
+
+        host = config.get("lmstudio", {}).get("host", "http://localhost:1234")
+        model = config.get("lmstudio", {}).get("model", "")
+        return LMStudioProvider(host=host, model=model)
+
     else:
-        raise ProviderError(f"Unknown provider: {name}. Available: ollama, openai, anthropic")
+        raise ProviderError(f"Unknown provider: {name}. Available: ollama, openai, anthropic, lmstudio")
