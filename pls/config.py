@@ -35,6 +35,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "api_key": "",
         "model": "claude-sonnet-4-20250514",
     },
+    "lmstudio": {
+        "host": "http://localhost:1234",
+        "model": "",
+    },
 }
 
 
