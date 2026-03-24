@@ -6,7 +6,7 @@ from pls.providers import ProviderError
 
 
 class OllamaProvider:
-    def __init__(self, host: str = "http://localhost:11434", model: str = "llama3.2"):
+    def __init__(self, host: str = "http://localhost:11434", model: str = "qwen3.5:2b"):
         self.host = host.rstrip("/")
         self.model = model
 

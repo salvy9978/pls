@@ -79,7 +79,7 @@ Dangerous commands flip the confirmation to opt-in (`y/N` instead of `Y/n`).
 ```bash
 # make sure ollama is running
 ollama serve
-ollama pull llama3.2
+ollama pull qwen3.5:2b
 
 pls "list all docker containers"
 # just works

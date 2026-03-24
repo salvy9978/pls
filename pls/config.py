@@ -25,7 +25,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     },
     "ollama": {
         "host": "http://localhost:11434",
-        "model": "llama3.2",
+        "model": "qwen3.5:2b",
     },
     "openai": {
         "api_key": "",

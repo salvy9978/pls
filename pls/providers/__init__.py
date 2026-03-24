@@ -16,7 +16,7 @@ def get_provider(name: str, config: dict[str, Any]) -> Provider:
         from pls.providers.ollama import OllamaProvider
 
         host = config.get("ollama", {}).get("host", "http://localhost:11434")
-        model = config.get("ollama", {}).get("model", "llama3.2")
+        model = config.get("ollama", {}).get("model", "qwen3.5:2b")
         return OllamaProvider(host=host, model=model)
 
     elif name == "openai":
