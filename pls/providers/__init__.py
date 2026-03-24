@@ -50,5 +50,18 @@ def get_provider(name: str, config: dict[str, Any]) -> Provider:
         model = config.get("lmstudio", {}).get("model", "")
         return LMStudioProvider(host=host, model=model)
 
+    elif name == "custom":
+        from pls.providers.custom import CustomProvider
+
+        custom_cfg = config.get("custom", {})
+        url = custom_cfg.get("url", "")
+        if not url:
+            raise ProviderError(
+                "Custom provider URL not set. Run: pls config set custom url http://localhost:8080"
+            )
+        model = custom_cfg.get("model", "")
+        api_key = custom_cfg.get("api_key", "")
+        return CustomProvider(url=url, model=model, api_key=api_key)
+
     else:
-        raise ProviderError(f"Unknown provider: {name}. Available: ollama, openai, anthropic, lmstudio")
+        raise ProviderError(f"Unknown provider: {name}. Available: ollama, openai, anthropic, lmstudio, custom")

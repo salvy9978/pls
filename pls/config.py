@@ -39,6 +39,11 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "host": "http://localhost:1234",
         "model": "",
     },
+    "custom": {
+        "url": "",
+        "model": "",
+        "api_key": "",
+    },
 }
 
 

@@ -72,6 +72,8 @@ echo "do something" | pls           # pipe from stdin
 `dd`, piping random scripts into `bash` — all gets highlighted in red with a warning.
 Dangerous commands flip the confirmation to opt-in (`y/N` instead of `Y/n`).
 
+Press `e` at the confirmation prompt to edit the command before running it.
+
 ## Providers
 
 **Ollama** is the default. Runs locally, no account needed.
@@ -83,6 +85,19 @@ ollama pull qwen3.5:2b
 
 pls "list all docker containers"
 # just works
+```
+
+**LM Studio**, **llama.cpp**, or any **OpenAI-compatible** server:
+
+```bash
+# LM Studio (runs on port 1234 by default)
+pls config set default provider lmstudio
+
+# any OpenAI-compatible endpoint (llama.cpp, vLLM, OpenRouter, etc.)
+pls config set custom url http://localhost:8080
+pls config set custom model my-model
+pls config set custom api_key sk-...          # optional
+pls config set default provider custom
 ```
 
 **OpenAI** and **Anthropic** if you want cloud models:
