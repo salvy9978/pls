@@ -175,8 +175,10 @@ def _run_request(
         console.print("\n[yellow]Interrupted.[/yellow]")
     elif result.exit_code == 0:
         console.print(f"\n[green bold]\u2713 Done.[/green bold]")
-    else:
+    elif result.exit_code >= 126:
         console.print(f"\n[red bold]\u2717 Failed[/red bold] [dim](exit code {result.exit_code})[/dim]")
+    else:
+        console.print(f"\n[dim]Done (exit code {result.exit_code})[/dim]")
 
     sys.exit(result.exit_code)
 
