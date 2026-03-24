@@ -134,12 +134,15 @@ def _run_request(
     dry_run: bool = False,
     provider_override: str | None = None,
     model_override: str | None = None,
+    api_url_override: str | None = None,
 ) -> None:
     config = load_config()
     provider_name = provider_override or get_provider_name(config)
 
     if model_override:
         config.setdefault(provider_name, {})["model"] = model_override
+    if api_url_override:
+        config.setdefault(provider_name, {})["api_url"] = api_url_override
 
     try:
         llm = get_provider(provider_name, config)
@@ -282,6 +285,7 @@ def main() -> None:
     dry_run = False
     provider_val: str | None = None
     model_val: str | None = None
+    api_url_val: str | None = None
 
     i = 0
     while i < len(args):
@@ -298,6 +302,9 @@ def main() -> None:
         elif arg in ("--model", "-m") and i + 1 < len(args):
             i += 1
             model_val = args[i]
+        elif arg in ("--api-url", "-u") and i + 1 < len(args):
+            i += 1
+            api_url_val = args[i]
         elif not arg.startswith("-"):
             request_parts.append(arg)
         i += 1
@@ -319,4 +326,5 @@ def main() -> None:
         dry_run=dry_run,
         provider_override=provider_val,
         model_override=model_val,
+        api_url_override=api_url_val,
     )
