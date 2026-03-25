@@ -36,11 +36,15 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "model": "claude-sonnet-4-20250514",
     },
     "lmstudio": {
-        "host": "http://localhost:1234",
+        "api_url": "http://localhost:1234/v1/chat/completions",
+        "model": "",
+    },
+    "llamacpp": {
+        "api_url": "http://localhost:8080/v1/chat/completions",
         "model": "",
     },
     "custom": {
-        "url": "",
+        "api_url": "",
         "model": "",
         "api_key": "",
     },
@@ -131,6 +135,9 @@ def get_api_key(config: dict[str, Any], provider_name: str | None = None) -> str
     env_map = {
         "openai": "OPENAI_API_KEY",
         "anthropic": "ANTHROPIC_API_KEY",
+        "lmstudio": "LMSTUDIO_API_KEY",
+        "llamacpp": "LLAMACPP_API_KEY",
+        "custom": "CUSTOM_API_KEY",
     }
 
     env_var = env_map.get(provider_name, "")

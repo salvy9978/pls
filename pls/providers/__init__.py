@@ -19,17 +19,22 @@ def get_provider(name: str, config: dict[str, Any]) -> Provider:
         model = config.get("ollama", {}).get("model", "qwen3.5:2b")
         return OllamaProvider(host=host, model=model)
 
-    elif name == "openai":
+    elif name in ("openai", "lmstudio", "llamacpp"):
         from pls.providers.openai import OpenAIProvider
         from pls.config import get_api_key, get_model
 
-        api_key = get_api_key(config, "openai")
-        if not api_key:
-            raise ProviderError(
-                "OpenAI API key not found. Set OPENAI_API_KEY env var or run: pls config set openai api_key <key>"
-            )
-        model = get_model(config, "openai") or "gpt-4o-mini"
-        return OpenAIProvider(api_key=api_key, model=model)
+        defaults = {
+            "openai": ("https://api.openai.com/v1/chat/completions", "gpt-4o-mini"),
+            "lmstudio": ("http://localhost:1234/v1/chat/completions", "unknown"),
+            "llamacpp": ("http://localhost:8080/v1/chat/completions", "unknown"),
+        }
+        default_url, default_model = defaults[name]
+
+        api_key = get_api_key(config, name) or "not-needed"
+        model = get_model(config, name) or default_model
+        api_url = config.get(name, {}).get("api_url") or default_url
+
+        return OpenAIProvider(api_key=api_key, model=model, api_url=api_url)
 
     elif name == "anthropic":
         from pls.providers.anthropic import AnthropicProvider
@@ -43,25 +48,21 @@ def get_provider(name: str, config: dict[str, Any]) -> Provider:
         model = get_model(config, "anthropic") or "claude-sonnet-4-20250514"
         return AnthropicProvider(api_key=api_key, model=model)
 
-    elif name == "lmstudio":
-        from pls.providers.lmstudio import LMStudioProvider
-
-        host = config.get("lmstudio", {}).get("host", "http://localhost:1234")
-        model = config.get("lmstudio", {}).get("model", "")
-        return LMStudioProvider(host=host, model=model)
-
-    elif name == "custom":
-        from pls.providers.custom import CustomProvider
-
-        custom_cfg = config.get("custom", {})
-        url = custom_cfg.get("url", "")
-        if not url:
-            raise ProviderError(
-                "Custom provider URL not set. Run: pls config set custom url http://localhost:8080"
-            )
-        model = custom_cfg.get("model", "")
-        api_key = custom_cfg.get("api_key", "")
-        return CustomProvider(url=url, model=model, api_key=api_key)
-
     else:
-        raise ProviderError(f"Unknown provider: {name}. Available: ollama, openai, anthropic, lmstudio, custom")
+        # Fallback for any unknown provider or 'custom'
+        from pls.providers.openai import OpenAIProvider
+        from pls.config import get_api_key, get_model
+
+        # The maintainer added 'custom' section, let's support it too
+        section = "custom" if name == "custom" else name
+        api_url = config.get(section, {}).get("api_url") or config.get(section, {}).get("url")
+        
+        if not api_url:
+            raise ProviderError(
+                f"Unknown provider: {name}. Available presets: ollama, openai, lmstudio, llamacpp, anthropic.\n"
+                f"To use '{name}', set its API URL: pls config set {name} api_url <url>"
+            )
+
+        api_key = get_api_key(config, section) or "not-needed"
+        model = get_model(config, section) or "unknown"
+        return OpenAIProvider(api_key=api_key, model=model, api_url=api_url)

@@ -62,6 +62,7 @@ pls "do something" --yes            # skip confirmation, just run it
 pls "do something" --dry-run        # show command but don't run it
 pls "do something" --provider openai
 pls "do something" --model gpt-4o
+pls "do something" --api-url http://localhost:8080   # override URL on the fly
 pls --last                          # show the last generated command
 echo "do something" | pls           # pipe from stdin
 ```
@@ -94,10 +95,12 @@ pls "list all docker containers"
 pls config set default provider lmstudio
 
 # any OpenAI-compatible endpoint (llama.cpp, vLLM, OpenRouter, etc.)
-pls config set custom url http://localhost:8080
+pls config set custom api_url http://localhost:8080
 pls config set custom model my-model
 pls config set custom api_key sk-...          # optional
 pls config set default provider custom
+
+`pls` automatically handles URL expansion — you can just provide the base host and port (e.g., `http://localhost:8080`), and it will correctly target the `/v1/chat/completions` endpoint.
 ```
 
 **OpenAI** and **Anthropic** if you want cloud models:
