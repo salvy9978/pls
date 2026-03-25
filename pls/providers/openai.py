@@ -27,22 +27,26 @@ class OpenAIProvider:
         return f"{url}/v1/chat/completions"
 
     def generate(self, system_prompt: str, user_message: str) -> str:
+        headers: dict[str, str] = {"Content-Type": "application/json"}
+        if self.api_key and self.api_key != "not-needed":
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        payload: dict = {
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+            "temperature": 0.1,
+            "max_tokens": 512,
+        }
+        if self.model and self.model != "unknown":
+            payload["model"] = self.model
+
         try:
             response = httpx.post(
                 self.api_url,
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_message},
-                    ],
-                    "temperature": 0.1,
-                    "max_tokens": 512,
-                },
+                headers=headers,
+                json=payload,
                 timeout=30.0,
             )
             response.raise_for_status()
