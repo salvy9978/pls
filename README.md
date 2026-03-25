@@ -37,6 +37,8 @@ $ pls "compress all PNGs in this folder"
 ## Install
 
 ```bash
+pipx install pls-sh    # recommended
+# or
 pip install pls-sh
 ```
 
