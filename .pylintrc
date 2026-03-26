@@ -1,0 +1,25 @@
+[MASTER]
+# Ignore third-party modules and virtual environments
+ignore=.scan_venv,venv,env,.git,__pycache__,tests
+
+# Add regular expressions to ignore paths
+ignore-paths=
+    ^.*?\.scan_venv[\\/].*$,
+    ^.*?venv[\\/].*$,
+    ^.*?env[\\/].*$
+
+[MESSAGES CONTROL]
+# Enable all by default, can selectively disable if needed
+disable=import-outside-toplevel,global-statement,cyclic-import
+
+[FORMAT]
+max-line-length=120
+
+[DESIGN]
+max-args=10
+max-positional-arguments=10
+max-locals=25
+max-attributes=15
+max-statements=100
+max-branches=20
+min-public-methods=0

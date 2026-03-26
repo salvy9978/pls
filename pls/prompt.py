@@ -1,3 +1,5 @@
+"""Prompt generation for LLM."""
+
 from __future__ import annotations
 
 SYSTEM_PROMPT = """\
@@ -37,6 +39,7 @@ find . -name "*.log" -delete
 
 
 def build_system_prompt(context: dict[str, str], *, explain: bool = False) -> str:
+    """Build the system prompt."""
     safe_context = {k: v.replace("{", "{{").replace("}", "}}") for k, v in context.items()}
     prompt = SYSTEM_PROMPT.format(**safe_context)
     if explain:
@@ -45,4 +48,5 @@ def build_system_prompt(context: dict[str, str], *, explain: bool = False) -> st
 
 
 def build_user_message(request: str) -> str:
+    """Build the user message."""
     return request.strip()
