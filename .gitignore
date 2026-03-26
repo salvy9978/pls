@@ -10,3 +10,5 @@ build/
 .ruff_cache/
 .pytest_cache/
 .idea/
+scan_reports/
+.scan_venv/

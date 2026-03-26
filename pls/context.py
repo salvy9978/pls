@@ -1,8 +1,8 @@
+"""Context gathering module for the pls CLI."""
+
 from __future__ import annotations
 
 import os
-import platform
-import shutil
 from pathlib import Path
 
 MAX_FILES_IN_CONTEXT = 50
@@ -10,6 +10,8 @@ MAX_FILENAME_LEN = 80
 
 
 def _detect_shell() -> str:
+    import platform
+
     shell = os.environ.get("SHELL", "")
     if shell:
         return Path(shell).name
@@ -22,15 +24,15 @@ def _detect_shell() -> str:
 
 def _list_cwd_files() -> list[str]:
     try:
-        entries = sorted(Path.cwd().iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+        all_entries = sorted(Path.cwd().iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
         result = []
-        for entry in entries[:MAX_FILES_IN_CONTEXT]:
+        for entry in all_entries[:MAX_FILES_IN_CONTEXT]:
             name = entry.name
             if len(name) > MAX_FILENAME_LEN:
                 name = name[:MAX_FILENAME_LEN] + "..."
             suffix = "/" if entry.is_dir() else ""
             result.append(f"{name}{suffix}")
-        remaining = len(list(Path.cwd().iterdir())) - MAX_FILES_IN_CONTEXT
+        remaining = len(all_entries) - MAX_FILES_IN_CONTEXT
         if remaining > 0:
             result.append(f"... and {remaining} more files")
         return result
@@ -39,10 +41,13 @@ def _list_cwd_files() -> list[str]:
 
 
 def _has_tool(name: str) -> bool:
+    import shutil
     return shutil.which(name) is not None
 
 
 def gather() -> dict[str, str]:
+    """Gather context information about the local file system and environment."""
+    import platform
     cwd_files = _list_cwd_files()
     available_tools = [t for t in ["git", "docker", "python3", "node", "cargo", "go"] if _has_tool(t)]
 

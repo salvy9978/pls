@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""OpenAI API compatible LLM provider implementation."""
 
-import httpx
+from __future__ import annotations
 
 from pls.providers import ProviderError
 
@@ -8,6 +8,7 @@ OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
 
 class OpenAIProvider:
+    """Provider class for the OpenAI API and compatible services."""
     def __init__(
         self,
         api_key: str,
@@ -27,6 +28,9 @@ class OpenAIProvider:
         return f"{url}/v1/chat/completions"
 
     def generate(self, system_prompt: str, user_message: str) -> str:
+        """Generate a response using an OpenAI-compatible API."""
+        import httpx
+
         headers: dict[str, str] = {"Content-Type": "application/json"}
         if self.api_key and self.api_key != "not-needed":
             headers["Authorization"] = f"Bearer {self.api_key}"
@@ -43,22 +47,22 @@ class OpenAIProvider:
             payload["model"] = self.model
 
         try:
-            response = httpx.post(
-                self.api_url,
-                headers=headers,
-                json=payload,
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["choices"][0]["message"]["content"].strip()
+            with httpx.Client(timeout=30.0) as client:
+                response = client.post(
+                    self.api_url,
+                    headers=headers,
+                    json=payload,
+                )
+                response.raise_for_status()
+                data = response.json()
+                return data["choices"][0]["message"]["content"].strip()
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
-                raise ProviderError(f"Invalid API key for {self.api_url}")
+                raise ProviderError(f"Invalid API key for {self.api_url}") from e
             if e.response.status_code == 429:
-                raise ProviderError(f"Rate limit hit for {self.api_url}. Wait a moment and try again.")
-            raise ProviderError(f"API error from {self.api_url}: {e.response.status_code} — {e.response.text}")
-        except (KeyError, IndexError):
-            raise ProviderError(f"Unexpected response format from {self.api_url}")
-        except httpx.TimeoutException:
-            raise ProviderError(f"Request to {self.api_url} timed out.")
+                raise ProviderError(f"Rate limit hit for {self.api_url}. Wait a moment and try again.") from e
+            raise ProviderError(f"API error from {self.api_url}: {e.response.status_code} — {e.response.text}") from e
+        except (KeyError, IndexError) as exc:
+            raise ProviderError(f"Unexpected response format from {self.api_url}") from exc
+        except httpx.TimeoutException as exc:
+            raise ProviderError(f"Request to {self.api_url} timed out.") from exc

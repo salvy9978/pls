@@ -1,3 +1,5 @@
+"""Configuration management for pls."""
+
 from __future__ import annotations
 
 import os
@@ -55,7 +57,7 @@ def _parse_toml(text: str) -> dict[str, Any]:
     if not _FALLBACK_TOML:
         return tomllib.loads(text)
     result: dict[str, Any] = {}
-    current_section: dict[str, Any] | None = None
+    current_section_name: str | None = None
     for line in text.splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
@@ -63,12 +65,12 @@ def _parse_toml(text: str) -> dict[str, Any]:
         if line.startswith("[") and line.endswith("]"):
             section_name = line[1:-1].strip()
             result[section_name] = {}
-            current_section = result[section_name]
-        elif "=" in line and current_section is not None:
+            current_section_name = section_name
+        elif "=" in line and current_section_name is not None:
             key, _, value = line.partition("=")
             key = key.strip()
             value = value.strip().strip('"').strip("'")
-            current_section[key] = value
+            result[current_section_name][key] = value
     return result
 
 
@@ -99,26 +101,30 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 
 def load_config() -> dict[str, Any]:
+    """Load config from TOML."""
     if not CONFIG_FILE.exists():
         return DEFAULT_CONFIG.copy()
     try:
         text = CONFIG_FILE.read_text(encoding="utf-8")
         user_config = _parse_toml(text)
         return _deep_merge(DEFAULT_CONFIG, user_config)
-    except Exception:
+    except (OSError, ValueError):
         return DEFAULT_CONFIG.copy()
 
 
 def save_config(config: dict[str, Any]) -> None:
+    """Save config to TOML."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     CONFIG_FILE.write_text(_dump_toml(config), encoding="utf-8")
 
 
 def get_provider_name(config: dict[str, Any]) -> str:
+    """Get the default provider name."""
     return config.get("default", {}).get("provider", "ollama")
 
 
 def get_model(config: dict[str, Any], provider_name: str | None = None) -> str:
+    """Get the default model."""
     if provider_name is None:
         provider_name = get_provider_name(config)
 
@@ -129,6 +135,7 @@ def get_model(config: dict[str, Any], provider_name: str | None = None) -> str:
 
 
 def get_api_key(config: dict[str, Any], provider_name: str | None = None) -> str:
+    """Get the default API key."""
     if provider_name is None:
         provider_name = get_provider_name(config)
 
@@ -149,6 +156,7 @@ def get_api_key(config: dict[str, Any], provider_name: str | None = None) -> str
 
 
 def set_config_value(section: str, key: str, value: str) -> None:
+    """Set a config value."""
     config = load_config()
     if section not in config:
         config[section] = {}
