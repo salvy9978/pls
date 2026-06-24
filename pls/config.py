@@ -154,3 +154,36 @@ def set_config_value(section: str, key: str, value: str) -> None:
         config[section] = {}
     config[section][key] = value
     save_config(config)
+
+
+def is_first_run() -> bool:
+    """Check if this is the first run (config file doesn't exist)."""
+    return not CONFIG_FILE.exists()
+
+
+def setup_first_run() -> None:
+    """Prompt user to select their preferred Ollama model on first run."""
+    from rich.console import Console
+    console = Console()
+    
+    console.print("\n[bold]Welcome to pls![/bold] Which model do you want to use?\n")
+    console.print("  1. qwen3.5:2b (default)")
+    console.print("  2. llama3.2")
+    console.print("  3. Other (enter name)\n")
+    
+    choice = input("> ").strip()
+    
+    if choice == "1" or choice == "":
+        model = "qwen3.5:2b"
+    elif choice == "2":
+        model = "llama3.2"
+    else:
+        model = input("Enter model name: ").strip()
+        if not model:
+            model = "qwen3.5:2b"
+    
+    config = load_config()
+    config["ollama"]["model"] = model
+    save_config(config)
+    
+    console.print(f"\n[green]✓[/green] Model set to: [bold]{model}[/bold]\n")

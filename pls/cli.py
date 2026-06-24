@@ -136,6 +136,13 @@ def _run_request(
     model_override: str | None = None,
     api_url_override: str | None = None,
 ) -> None:
+    from pls.config import is_first_run, setup_first_run
+
+    if is_first_run() and provider_override != "ollama":
+        setup_first_run()
+    elif is_first_run():
+        setup_first_run()
+
     config = load_config()
     provider_name = provider_override or get_provider_name(config)
 
