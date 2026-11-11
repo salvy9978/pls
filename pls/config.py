@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import os
 import sys
 from pathlib import Path
@@ -100,13 +101,13 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 def load_config() -> dict[str, Any]:
     if not CONFIG_FILE.exists():
-        return DEFAULT_CONFIG.copy()
+        return copy.deepcopy(DEFAULT_CONFIG)
     try:
         text = CONFIG_FILE.read_text(encoding="utf-8")
         user_config = _parse_toml(text)
-        return _deep_merge(DEFAULT_CONFIG, user_config)
+        return _deep_merge(copy.deepcopy(DEFAULT_CONFIG), user_config)
     except Exception:
-        return DEFAULT_CONFIG.copy()
+        return copy.deepcopy(DEFAULT_CONFIG)
 
 
 def save_config(config: dict[str, Any]) -> None:
